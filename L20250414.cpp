@@ -1,20 +1,116 @@
-// L20250414.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <Windows.h>
+
+#define MAPLENGTH 10
+#define WALL '#'
+#define SPACE ' '
+
+using namespace std;
+
+struct Player
+{
+    int xPos = 1;
+    int yPos = 1;
+    char playerMesh = 'P';
+};
+
+bool Input(Player* player);
+void Tick(Player* player);
+void Render(Player* player);
+
+char Map[MAPLENGTH][MAPLENGTH] = {};
+char RenderMap[MAPLENGTH][MAPLENGTH] = {};
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    // Wall init
+    for (int i = 0;i < MAPLENGTH; i++)
+    {
+        for (int j = 0; j < MAPLENGTH; j++)
+        {
+            if (i == 0 || j == 0 || i == MAPLENGTH - 1 || j == MAPLENGTH - 1)
+            {
+                Map[j][i] = WALL;
+            }
+            else
+            {
+                Map[j][i] = SPACE;
+            }
+        }
+    }
+    Player* player1 = new Player;
+
+    bool IsRunning = true;
+    while (IsRunning)
+    {
+        IsRunning = Input(player1);
+        Tick(player1);
+        Render(player1);
+    }
+
+    return 0;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+bool Input(Player* player)
+{
+    if (GetAsyncKeyState((unsigned short)'Q') & 0x8000)
+    {
+        return false;
+    }
+    if (GetAsyncKeyState(VK_UP) & 0x8000)
+    {
+        if (Map[player->xPos][player->yPos - 1] != WALL)
+        {
+            player->yPos--;
+        }
+    }
+    if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+    {
+        if(Map[player->xPos][player->yPos + 1] != WALL)
+        {
+            player->yPos++;
+        }
+    }
+    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+    {
+        if(Map[player->xPos - 1][player->yPos] != WALL)
+        {
+            player->xPos--;
+        }
+    }
+    if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+    {
+        if(Map[player->xPos + 1][player->yPos] != WALL)
+        {
+            player->xPos++;
+        }
+    }
+    return true;
+}
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void Tick(Player* player)
+{
+    for (int i = 0;i < MAPLENGTH; i++)
+    {
+        for (int j = 0; j < MAPLENGTH; j++)
+        {
+            RenderMap[j][i] = Map[j][i];
+        }
+    }
+    RenderMap[player->xPos][player->yPos] = player->playerMesh;
+}
+
+void Render(Player* player)
+{
+    system("cls");
+    for (int i = 0;i < MAPLENGTH; i++)
+    {
+        for (int j = 0; j < MAPLENGTH; j++)
+        {
+            cout << RenderMap[j][i];
+        }
+        cout << "\n";
+    }
+    cout << "Exit : Q\n";
+    Sleep(5);
+}
