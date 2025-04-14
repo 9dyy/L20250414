@@ -14,8 +14,18 @@ struct Player
     char playerMesh = 'P';
 };
 
-bool Input(Player* player);
-void Tick(Player* player);
+enum EInputResult
+{
+    NONE,
+    UP,
+    DOWN,
+    RIGHT,
+    LEFT,
+    QUIT,
+};
+
+EInputResult Input(Player* player);
+void Tick(Player* player, EInputResult inputResult);
 void Render(Player* player);
 
 char Map[MAPLENGTH][MAPLENGTH] = {};
@@ -43,53 +53,75 @@ int main()
     bool IsRunning = true;
     while (IsRunning)
     {
-        IsRunning = Input(player1);
-        Tick(player1);
+        EInputResult nowInput = Input(player1);
+        if (nowInput == EInputResult::QUIT)
+        {
+            return 0;
+        }
+        Tick(player1, nowInput);
         Render(player1);
     }
-
     return 0;
 }
 
-bool Input(Player* player)
+EInputResult Input(Player* player)
 {
     if (GetAsyncKeyState((unsigned short)'Q') & 0x8000)
     {
-        return false;
+        return EInputResult::QUIT;
     }
     if (GetAsyncKeyState(VK_UP) & 0x8000)
     {
+        return EInputResult::UP;
+    }
+    if (GetAsyncKeyState(VK_DOWN) & 0x8000)
+    {
+        return EInputResult::DOWN;
+    }
+    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
+    {
+        return EInputResult::LEFT;
+    }
+    if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
+    {
+        return EInputResult::RIGHT;
+    }
+}
+
+void Tick(Player* player, EInputResult inputResult)
+{
+    switch (inputResult)
+    {
+    case UP:
         if (Map[player->xPos][player->yPos - 1] != WALL)
         {
             player->yPos--;
         }
-    }
-    if (GetAsyncKeyState(VK_DOWN) & 0x8000)
-    {
-        if(Map[player->xPos][player->yPos + 1] != WALL)
+        break;
+    case DOWN:
+        if (Map[player->xPos][player->yPos + 1] != WALL)
         {
             player->yPos++;
         }
-    }
-    if (GetAsyncKeyState(VK_LEFT) & 0x8000)
-    {
-        if(Map[player->xPos - 1][player->yPos] != WALL)
-        {
-            player->xPos--;
-        }
-    }
-    if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
-    {
-        if(Map[player->xPos + 1][player->yPos] != WALL)
+        break;
+    case RIGHT:
+        if (Map[player->xPos + 1][player->yPos] != WALL)
         {
             player->xPos++;
         }
+        break;
+    case LEFT:
+        if (Map[player->xPos - 1][player->yPos] != WALL)
+        {
+            player->xPos--;
+        }
+        break;
+    case QUIT:
+        break;
+    default:
+        break;
     }
-    return true;
-}
 
-void Tick(Player* player)
-{
     for (int i = 0;i < MAPLENGTH; i++)
     {
         for (int j = 0; j < MAPLENGTH; j++)
